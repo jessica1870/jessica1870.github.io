@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IPA Sound Quiz</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app">
+
+    <!-- ===================== SETUP ===================== -->
+    <section id="setup" class="screen">
+      <header class="hero">
+        <h1>IPA Sound Quiz</h1>
+        <p class="lede">Listen to a sound, pick the IPA symbol, and check your answer.</p>
+      </header>
+
+      <form id="setup-form" class="card">
+        <fieldset>
+          <legend>Sounds to include</legend>
+          <label class="check"><input type="checkbox" name="cat" value="vowel" checked> <span>Vowels <small data-count="vowel"></small></span></label>
+          <label class="check"><input type="checkbox" name="cat" value="pulmonic" checked> <span>Pulmonic consonants <small data-count="pulmonic"></small></span></label>
+          <label class="check sub"><input type="checkbox" id="affricates"> <span>Include affricates &amp; lateral affricate <small data-count="affricate"></small></span></label>
+          <label class="check"><input type="checkbox" name="cat" value="nonpulmonic"> <span>Non-pulmonic consonants <small data-count="nonpulmonic"></small></span></label>
+          <p class="hint" id="cat-error" hidden>Choose at least one group.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>How to answer</legend>
+          <label class="radio"><input type="radio" name="mode" value="chart" checked>
+            <span><strong>Full chart</strong><small>Pick from every symbol in the selected groups, laid out like the IPA chart.</small></span></label>
+          <label class="radio"><input type="radio" name="mode" value="choice">
+            <span><strong>Multiple choice</strong><small>Pick from 6 options: the answer plus similar-sounding symbols.</small></span></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Quiz length</legend>
+          <div class="pills">
+            <label class="pill"><input type="radio" name="length" value="10" checked><span>10</span></label>
+            <label class="pill"><input type="radio" name="length" value="20"><span>20</span></label>
+            <label class="pill"><input type="radio" name="length" value="all"><span>All <small id="all-count"></small></span></label>
+            <label class="pill"><input type="radio" name="length" value="endless"><span>Endless</span></label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn primary big">Start quiz</button>
+      </form>
+    </section>
+
+    <!-- ===================== QUIZ ===================== -->
+    <section id="quiz" class="screen" hidden>
+      <div class="topbar">
+        <span id="progress"></span>
+        <span id="score"></span>
+        <button type="button" id="quit" class="btn ghost small">Finish</button>
+      </div>
+
+      <div class="card question">
+        <button type="button" id="play" class="play" aria-label="Play sound">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="question-text">
+          <p class="prompt">Which sound is this?</p>
+          <p class="hint">Space replays the sound · Enter submits</p>
+        </div>
+      </div>
+
+      <div id="answers" class="answers"></div>
+
+      <div class="dock">
+        <div id="feedback" class="feedback" hidden></div>
+        <div class="actions">
+          <span id="selected-label" class="selected-label"></span>
+          <button type="button" id="submit" class="btn primary" disabled>Submit</button>
+          <button type="button" id="next" class="btn primary" hidden>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== RESULTS ===================== -->
+    <section id="results" class="screen" hidden>
+      <div class="card results-card">
+        <h2>Quiz complete</h2>
+        <p id="final-score" class="final-score"></p>
+        <div id="missed"></div>
+        <div class="results-actions">
+          <button type="button" id="retry-missed" class="btn">Retry missed sounds</button>
+          <button type="button" id="restart" class="btn primary">New quiz</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="tooltip" role="tooltip" hidden></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
