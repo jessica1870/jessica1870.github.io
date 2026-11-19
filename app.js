@@ -97,7 +97,7 @@
 
   // ---------------------------------------------------------------- setup screen
   const form = $("#setup-form");
-  const screens = { setup: $("#setup"), quiz: $("#quiz"), results: $("#results") };
+  const screens = { setup: $("#setup"), quiz: $("#quiz"), results: $("#results"), charts: $("#charts") };
   const show = (name) => {
     for (const [k, el] of Object.entries(screens)) el.hidden = k !== name;
     hideTip();
@@ -305,15 +305,21 @@
   }
 
   function renderChart() {
-    const parts = [];
-    if (state.cats.includes("vowel")) parts.push(vowelChart());
-    if (state.cats.includes("pulmonic")) parts.push(pulmonicChart());
-    if (state.cats.includes("nonpulmonic")) parts.push(nonPulmonicChart());
-    $("#answers").innerHTML = parts.join("");
+    $("#answers").innerHTML = chartsHtml(state.cats, state.pool);
   }
 
-  function pulmonicChart() {
-    const sounds = state.pool.filter((s) => s.cat === "pulmonic" && !s.other);
+  // Charts for the given categories, showing only the sounds in `pool`.
+  // Used by the quiz (selected sounds) and the chart page (every sound).
+  function chartsHtml(cats, pool) {
+    const parts = [];
+    if (cats.includes("vowel")) parts.push(vowelChart(pool));
+    if (cats.includes("pulmonic")) parts.push(pulmonicChart(pool));
+    if (cats.includes("nonpulmonic")) parts.push(nonPulmonicChart(pool));
+    return parts.join("");
+  }
+
+  function pulmonicChart(pool) {
+    const sounds = pool.filter((s) => s.cat === "pulmonic" && !s.other);
     const at = (row, col, v) => sounds.find((s) => s.row === row && s.col === col && s.voiced === v);
     const rowShown = (row) => sounds.some((s) => s.row === row);
     let html = `<div class="card chart-block"><h3>Pulmonic consonants</h3><div class="scroll-x"><table class="pulmonic"><thead><tr><th></th>`;
@@ -331,14 +337,14 @@
       html += `</tr>`;
     });
     html += `</tbody></table></div>`;
-    const other = SOUNDS.filter((s) => s.cat === "pulmonic" && s.other);
+    const other = pool.filter((s) => s.cat === "pulmonic" && s.other);
     html += `<div class="other-row"><span class="label">Other symbols</span>${other.map(symButton).join("")}</div>`;
     html += `<p class="hint">Where symbols appear in pairs, the one on the right is voiced.</p></div>`;
     return html;
   }
 
-  function nonPulmonicChart() {
-    const np = SOUNDS.filter((s) => s.cat === "nonpulmonic");
+  function nonPulmonicChart(pool) {
+    const np = pool.filter((s) => s.cat === "nonpulmonic");
     const clicks = np.filter((s) => s.type === "click");
     const places = [...new Set(clicks.map((s) => s.placeLabel))];
     let clickRows = places.map((p) => {
@@ -368,8 +374,8 @@
       default: return back;
     }
   }
-  function vowelChart() {
-    const vowels = SOUNDS.filter((s) => s.cat === "vowel" && !s.other);
+  function vowelChart(pool) {
+    const vowels = pool.filter((s) => s.cat === "vowel" && !s.other);
     const fx = (h) => (h / 6) * 40;
     const y = (h) => (h / 6) * 100;
     const lines = [
@@ -395,7 +401,7 @@
     const axes = `<span class="axis" style="left:0;top:-26px;transform:translateX(-50%)">Front</span>
       <span class="axis" style="left:50%;top:-26px;transform:translateX(-50%)">Central</span>
       <span class="axis" style="left:100%;top:-26px;transform:translateX(-50%)">Back</span>`;
-    const other = SOUNDS.filter((s) => s.cat === "vowel" && s.other);
+    const other = pool.filter((s) => s.cat === "vowel" && s.other);
     return `<div class="card chart-block"><h3>Vowels</h3><div class="vowel-wrap">
       <div class="vowel-chart">${svg}${axes}${buttons}</div>
       <div class="other-row"><span class="label">Other</span>${other.map(symButton).join("")}</div>
@@ -481,4 +487,24 @@
   document.addEventListener("keyup", (e) => {
     if (!screens.quiz.hidden && e.key === " ") e.preventDefault();
   });
+
+  // ---------------------------------------------------------------- chart page
+  // "#charts" shows every sound in chart form; clicking a symbol plays it.
+  const chartsEl = $("#charts-content");
+  chartsEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".sym");
+    if (b) play(byId.get(b.dataset.id), b);
+  });
+  function route() {
+    if (location.hash === "#charts") {
+      if (!chartsEl.innerHTML) chartsEl.innerHTML = chartsHtml(["vowel", "pulmonic", "nonpulmonic"], SOUNDS);
+      audio.pause();
+      show("charts");
+    } else if (!screens.charts.hidden) {
+      audio.pause();
+      show("setup");
+    }
+  }
+  window.addEventListener("hashchange", route);
+  route();
 })();
