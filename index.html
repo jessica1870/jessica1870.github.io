@@ -14,7 +14,16 @@
       <header class="hero">
         <h1>IPA Sound Quiz</h1>
         <p class="lede">Listen to a sound, pick the IPA symbol, and check your answer.</p>
+        <p><b>Updated on 19/11/26 to increase the volume of all sounds and added an button to browse the charts.</b></p>
       </header>
+
+      <a class="link-card card" href="#charts">
+        <span>
+          <strong>IPA Consonants and Vowels</strong>
+          <small>Browse the charts and click any symbol to hear it.</small>
+        </span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
 
       <form id="setup-form" class="card">
         <fieldset>
@@ -89,6 +98,16 @@
           <button type="button" id="restart" class="btn primary">New quiz</button>
         </div>
       </div>
+    </section>
+
+    <!-- ===================== CHART PAGE ===================== -->
+    <section id="charts" class="screen" hidden>
+      <a href="#" class="back-link">← Back to quiz</a>
+      <header class="hero">
+        <h1>IPA Consonants and Vowels</h1>
+        <p class="lede">Click any symbol to hear it. Hover over a symbol to see its full name. Sounds by <a href="https://www.homepages.ucl.ac.uk/~ucjtcwh/IPA/IPAcharts.html" target="_blank">J. White.</a></p>
+      </header>
+      <div id="charts-content" class="answers"></div>
     </section>
 
   </main>
