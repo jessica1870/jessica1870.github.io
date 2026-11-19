@@ -1,8 +1,10 @@
 // IPA sound inventory for the quiz.
 // Symbols and sound files are taken from "Original IPA Site With Sounds/IPAcharts.html".
-// All sound files live in SOUND_DIR.
+// SOUND_DIR holds louder (300%) copies of the original recordings, made by
+// tools/boost-sounds.ps1. The originals in "Original IPA Site With Sounds/sounds/"
+// are untouched; re-run that script to regenerate or change the boost.
 
-const SOUND_DIR = "Original IPA Site With Sounds/sounds/";
+const SOUND_DIR = "sounds/";
 
 // ---------------------------------------------------------------------------
 // Pulmonic consonants
