@@ -97,7 +97,7 @@
 
   // ---------------------------------------------------------------- setup screen
   const form = $("#setup-form");
-  const screens = { setup: $("#setup"), quiz: $("#quiz"), results: $("#results"), charts: $("#charts") };
+  const screens = { setup: $("#setup"), quiz: $("#quiz"), results: $("#results"), charts: $("#charts"), practice: $("#practice") };
   const show = (name) => {
     for (const [k, el] of Object.entries(screens)) el.hidden = k !== name;
     hideTip();
@@ -354,11 +354,15 @@
     }).join("");
     const simple = (type) => np.filter((s) => s.type === type)
       .map((s) => `<tr><th>${s.placeLabel}</th><td>${symButton(s)}</td></tr>`).join("");
-    return `<div class="card chart-block"><h3>Non-pulmonic consonants</h3><div class="np-grid">
-      <table class="np"><thead><tr><th>Clicks</th><th>Voiceless</th><th>Nasalized</th></tr></thead><tbody>${clickRows}</tbody></table>
-      <table class="np"><thead><tr><th>Implosives</th><th></th></tr></thead><tbody>${simple("implosive")}</tbody></table>
-      <table class="np"><thead><tr><th>Ejectives</th><th></th></tr></thead><tbody>${simple("ejective")}</tbody></table>
-    </div></div>`;
+    // Each table only appears if the pool has sounds of that type (e.g. clicks can be excluded).
+    const tables = [];
+    if (clicks.length) tables.push(`<table class="np"><thead><tr><th>Clicks</th><th>Voiceless</th><th>Nasalized</th></tr></thead><tbody>${clickRows}</tbody></table>`);
+    for (const [type, label] of [["implosive", "Implosives"], ["ejective", "Ejectives"]]) {
+      const rows = simple(type);
+      if (rows) tables.push(`<table class="np"><thead><tr><th>${label}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`);
+    }
+    if (!tables.length) return "";
+    return `<div class="card chart-block"><h3>Non-pulmonic consonants</h3><div class="np-grid">${tables.join("")}</div></div>`;
   }
 
   // Vowel trapezoid. Coordinates are percentages of the chart box.
@@ -491,17 +495,61 @@
   // ---------------------------------------------------------------- chart page
   // "#charts" shows every sound in chart form; clicking a symbol plays it.
   const chartsEl = $("#charts-content");
-  chartsEl.addEventListener("click", (e) => {
-    const b = e.target.closest(".sym");
+  // Symbols inside any .playable area (chart page, practice page) play when clicked.
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest(".playable .sym");
     if (b) play(byId.get(b.dataset.id), b);
   });
+
+  // ---------------------------------------------------------------- oral production practice
+  // One item at a time: consonant + vowel (1 syllable) or C V C V (2 syllables).
+  const practice = { key: null };
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  function practicePool() {
+    // Affricates are always included here. Non-pulmonic consonants (or just clicks) can be excluded.
+    const noNonPulmonic = $("#practice-no-nonpulmonic").checked;
+    const clicksBox = $("#practice-no-clicks");
+    clicksBox.disabled = noNonPulmonic; // clicks are non-pulmonic, so this option is moot then
+    const noClicks = clicksBox.checked;
+    const consonants = SOUNDS.filter((s) =>
+      s.cat === "pulmonic" ||
+      (s.cat === "nonpulmonic" && !noNonPulmonic && !(noClicks && s.type === "click")));
+    const vowels = SOUNDS.filter((s) => s.cat === "vowel");
+    return { consonants, vowels };
+  }
+  function newPracticeItem() {
+    const { consonants, vowels } = practicePool();
+    const mode = $('input[name="syll"]:checked').value;
+    const syllables = mode === "mixed" ? (Math.random() < 0.5 ? 1 : 2) : Number(mode);
+    let item, key, tries = 0;
+    do { // avoid showing the exact same item twice in a row
+      item = [];
+      for (let i = 0; i < syllables; i++) item.push(pick(consonants), pick(vowels));
+      key = item.map((s) => s.id).join();
+    } while (key === practice.key && ++tries < 10);
+    practice.key = key;
+    $("#practice-sounds").innerHTML =
+      `<span class="bracket" aria-hidden="true">[</span>${item.map(symButton).join("")}<span class="bracket" aria-hidden="true">]</span>`;
+  }
+  function renderPracticeCharts() {
+    const { consonants, vowels } = practicePool();
+    $("#practice-charts").innerHTML = chartsHtml(["vowel", "pulmonic", "nonpulmonic"], [...vowels, ...consonants]);
+  }
+  $("#practice-next").addEventListener("click", () => { audio.pause(); newPracticeItem(); });
+  $("#practice .practice-options").addEventListener("change", (e) => {
+    if (e.target.name !== "syll") renderPracticeCharts();
+    newPracticeItem();
+  });
+
   function route() {
+    audio.pause();
     if (location.hash === "#charts") {
       if (!chartsEl.innerHTML) chartsEl.innerHTML = chartsHtml(["vowel", "pulmonic", "nonpulmonic"], SOUNDS);
-      audio.pause();
       show("charts");
-    } else if (!screens.charts.hidden) {
-      audio.pause();
+    } else if (location.hash === "#practice") {
+      if (!practice.key) { renderPracticeCharts(); newPracticeItem(); }
+      show("practice");
+    } else if (!screens.charts.hidden || !screens.practice.hidden) {
       show("setup");
     }
   }
