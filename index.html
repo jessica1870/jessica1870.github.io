@@ -25,6 +25,14 @@
         <span class="arrow" aria-hidden="true">→</span>
       </a>
 
+      <a class="link-card card" href="#practice">
+        <span>
+          <strong>Oral Production Exam Practice</strong>
+          <small>Practise saying random syllables like [ ħ ɑ ] or [ ɥ o r a ].</small>
+        </span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+
       <form id="setup-form" class="card">
         <fieldset>
           <legend>Sounds to include</legend>
@@ -107,7 +115,36 @@
         <h1>IPA Consonants and Vowels</h1>
         <p class="lede">Click any symbol to hear it. Hover over a symbol to see its full name. Sounds by <a href="https://www.homepages.ucl.ac.uk/~ucjtcwh/IPA/IPAcharts.html" target="_blank">J. White.</a></p>
       </header>
-      <div id="charts-content" class="answers"></div>
+      <div id="charts-content" class="answers playable"></div>
+    </section>
+
+    <!-- ===================== ORAL PRODUCTION PRACTICE ===================== -->
+    <section id="practice" class="screen" hidden>
+      <a href="#" class="back-link">← Back to quiz</a>
+      <header class="hero">
+        <h1>Oral Production Exam Practice</h1>
+        <p class="lede">Say the sounds out loud. Click any symbol to hear it, and move on when you feel confident.</p>
+      </header>
+
+      <div class="card practice-options">
+        <div class="opt-group">
+          <span class="opt-label">Syllables</span>
+          <div class="pills">
+            <label class="pill"><input type="radio" name="syll" value="1"><span>1</span></label>
+            <label class="pill"><input type="radio" name="syll" value="2"><span>2</span></label>
+            <label class="pill"><input type="radio" name="syll" value="mixed" checked><span>Mixed</span></label>
+          </div>
+        </div>
+        <label class="check inline"><input type="checkbox" id="practice-no-nonpulmonic" checked> <span>Exclude non-pulmonic consonants</span></label>
+        <label class="check inline"><input type="checkbox" id="practice-no-clicks" checked> <span>Exclude clicks</span></label>      </div>
+
+      <div class="card practice-item">
+        <div id="practice-sounds" class="practice-sounds playable" aria-live="polite"></div>
+        <p class="hint">Click a symbol to hear how it's produced.</p>
+        <button type="button" id="practice-next" class="btn primary">Next sounds</button>
+      </div>
+
+      <div id="practice-charts" class="answers playable"></div>
     </section>
 
   </main>
